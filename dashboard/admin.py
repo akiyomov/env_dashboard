@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.db.models import Avg, Count, Max, Min, F
+from django.db.models import Avg, Count, Max, Min
 from django.db import connection
 from django.utils.html import format_html
 from .models import Location, Metric, Alert, AirQualityIndex
@@ -76,7 +76,6 @@ class AQIAdmin(admin.ModelAdmin):
         }),
     )
 
-# Customize admin site header and title
 admin.site.site_header = 'Environmental Data Dashboard Administration'
 admin.site.site_title = 'Env Dashboard Admin'
 admin.site.index_title = 'Dashboard Administration'
