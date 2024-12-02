@@ -1,0 +1,65 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <h1>Air Quality Index Details</h1>
+            <h4>{{ aqi.location.city }} - {{ aqi.timestamp }}</h4>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'aqi_update' aqi.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'aqi_delete' aqi.pk %}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Current AQI: {{ aqi.aqi_value }}</h3>
+                    <p class="h5">Category: <span class="badge bg-{{ aqi.category|lower }}">{{ aqi.category }}</span></p>
+                    <p><strong>Dominant Pollutant:</strong> {{ aqi.dominant_pollutant }}</p>
+                    <p><strong>Health Implications:</strong><br>{{ aqi.health_implications }}</p>
+                </div>
+                <div class="col-md-6">
+                    {% if aqi_graph %}
+                    {{ aqi_graph|safe }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical AQI Data -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Historical AQI Data</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>AQI Value</th>
+                            <th>Category</th>
+                            <th>Dominant Pollutant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in historical_aqi %}
+                        <tr>
+                            <td>{{ record.timestamp }}</td>
+                            <td>{{ record.aqi_value }}</td>
+                            <td><span class="badge bg-{{ record.category|lower }}">{{ record.category }}</span></td>
+                            <td>{{ record.dominant_pollutant }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

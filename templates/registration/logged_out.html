@@ -1,0 +1,31 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Logged Out - Environmental Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card dashboard-card text-center">
+                <div class="card-header py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        Logged Out
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <p class="card-text">You have been successfully logged out.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'login' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login Again
+                        </a>
+                        <a href="{% url 'index' %}" class="btn btn-secondary">
+                            <i class="fas fa-home me-2"></i>Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

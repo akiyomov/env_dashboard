@@ -1,0 +1,105 @@
+<!-- templates/dashboard/location_detail.html -->
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <h1>{{ location.city }}, {{ location.country }}</h1>
+            <p class="text-muted">
+                Coordinates: {{ location.latitude }}, {{ location.longitude }}
+                {% if location.elevation %}
+                | Elevation: {{ location.elevation }}m
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'location_update' location.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'location_delete' location.pk %}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+
+    <!-- Visualizations -->
+    {% if pm25_graph %}
+    <div class="card mb-4">
+        <div class="card-body">
+            {{ pm25_graph|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if temp_humid_graph %}
+    <div class="card mb-4">
+        <div class="card-body">
+            {{ temp_humid_graph|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Latest Metrics -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Latest Measurements</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>PM2.5</th>
+                            <th>PM10</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in latest_metrics %}
+                        <tr>
+                            <td>{{ metric.timestamp }}</td>
+                            <td>{{ metric.pm25|floatformat:2 }}</td>
+                            <td>{{ metric.pm10|floatformat:2 }}</td>
+                            <td>{{ metric.temperature|floatformat:1 }}°C</td>
+                            <td>{{ metric.humidity|floatformat:1 }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Alerts -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Active Alerts</h3>
+        </div>
+        <div class="card-body">
+            {% if alerts %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Threshold</th>
+                            <th>User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alert in alerts %}
+                        <tr>
+                            <td>{{ alert.metric_type }}</td>
+                            <td>{{ alert.threshold_value }}</td>
+                            <td>{{ alert.user.username }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p>No active alerts for this location.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

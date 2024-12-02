@@ -1,0 +1,366 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Environmental Data Dashboard{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+    <!-- <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: var(--primary-color) !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            color: white !important;
+            font-weight: bold;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .dashboard-card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: none;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .badge {
+            padding: 0.5em 1em;
+        }
+
+        .badge.bg-good { background-color: #27ae60 !important; }
+        .badge.bg-moderate { background-color: #f39c12 !important; }
+        .badge.bg-unhealthy { background-color: #c0392b !important; }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            margin-top: auto;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+        }
+
+        /* Dark mode styles */
+        [data-bs-theme="dark"] {
+            --primary-color: #1a1a1a;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3498db;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Custom tooltips */
+        .custom-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-tooltip .tooltip-text {
+            visibility: hidden;
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 5px 10px;
+            border-radius: 6px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .custom-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+     -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="fas fa-leaf me-2"></i>
+                Environmental Dashboard
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" 
+                           href="{% url 'index' %}">
+                            <i class="fas fa-home me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'location' in request.resolver_match.url_name %}active{% endif %}" 
+                           href="{% url 'location_list' %}">
+                            <i class="fas fa-map-marker-alt me-1"></i> Locations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'metric' in request.resolver_match.url_name %}active{% endif %}" 
+                           href="{% url 'metric_list' %}">
+                            <i class="fas fa-chart-line me-1"></i> Metrics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'aqi' in request.resolver_match.url_name %}active{% endif %}" 
+                           href="{% url 'aqi_list' %}">
+                            <i class="fas fa-wind me-1"></i> AQI
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'alert' in request.resolver_match.url_name %}active{% endif %}" 
+                           href="{% url 'alert_list' %}">
+                            <i class="fas fa-bell me-1"></i> Alerts
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'query' in request.resolver_match.url_name %}active{% endif %}" 
+                           href="{% url 'query_demonstration' %}">
+                            <i class="fas fa-database me-1"></i> Queries
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Theme Toggle -->
+                    <li class="nav-item me-3">
+                        <button class="btn btn-link nav-link" id="theme-toggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                    
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            {% if user.is_staff %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'admin:index' %}">
+                                    <i class="fas fa-cog me-1"></i> Admin Panel
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="py-4 flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h5>Environmental Data Dashboard</h5>
+                    <p class="mb-0">Monitoring our environment, protecting our future.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <p class="mb-0">© {% now "Y" %} All rights reserved</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="#" class="text-white me-3"><i class="fab fa-github"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Theme toggling
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const icon = themeToggle.querySelector('i');
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+            
+            function updateThemeIcon(theme) {
+                icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        // Show loading spinner during page transitions
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a:not([target="_blank"])');
+            const spinner = document.querySelector('.loading-spinner');
+            
+            links.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (!link.hasAttribute('data-bs-toggle')) {
+                        spinner.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,111 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block content %}
+<div class="module">
+    <h2>Sample Queries Demonstration</h2>
+
+    <!-- JOIN Query Results -->
+    <div class="results">
+        <h3>JOIN Query: Locations with Average PM2.5</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Average PM2.5</th>
+                    <th>Measurement Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city, country, avg_pm25, count in join_results %}
+                <tr>
+                    <td>{{ city }}</td>
+                    <td>{{ country }}</td>
+                    <td>{{ avg_pm25|floatformat:2 }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Aggregate with GROUP BY Results -->
+    <div class="results">
+        <h3>Aggregate Query with GROUP BY: Daily Statistics</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Location ID</th>
+                    <th>Date</th>
+                    <th>Daily Avg PM2.5</th>
+                    <th>Max Temperature</th>
+                    <th>Min Temperature</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loc_id, date, avg_pm25, max_temp, min_temp in aggregate_results %}
+                <tr>
+                    <td>{{ loc_id }}</td>
+                    <td>{{ date }}</td>
+                    <td>{{ avg_pm25|floatformat:2 }}</td>
+                    <td>{{ max_temp|floatformat:1 }}°C</td>
+                    <td>{{ min_temp|floatformat:1 }}°C</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Subquery Results -->
+    <div class="results">
+        <h3>Subquery: Locations with Above Average Pollution</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city, country in subquery_results %}
+                <tr>
+                    <td>{{ city }}</td>
+                    <td>{{ country }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .results {
+        margin-bottom: 2em;
+        background: white;
+        padding: 1em;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .results h3 {
+        margin-bottom: 1em;
+        color: #417690;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+    }
+    th {
+        background: #417690;
+        color: white;
+    }
+    tr:hover {
+        background: #f5f5f5;
+    }
+</style>
+{% endblock %}

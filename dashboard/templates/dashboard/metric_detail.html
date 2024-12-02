@@ -1,0 +1,166 @@
+<!-- templates/dashboard/metric_detail.html -->
+{% extends 'dashboard/base.html' %}
+{% load form_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <h1>Measurement Details</h1>
+            <h4>{{ metric.location.city }} - {{ metric.timestamp }}</h4>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'metric_update' metric.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'metric_delete' metric.pk %}" class="btn btn-danger">Delete</a>
+            <a href="{% url 'location_detail' metric.location.pk %}" class="btn btn-secondary">
+                View Location
+            </a>
+        </div>
+    </div>
+
+    <!-- Current Measurement Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Current Measurements</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Air Quality Parameters</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>PM2.5:</th>
+                                <td>{{ metric.pm25|floatformat:2 }} µg/m³</td>
+                            </tr>
+                            <tr>
+                                <th>PM10:</th>
+                                <td>{{ metric.pm10|floatformat:2 }} µg/m³</td>
+                            </tr>
+                            <tr>
+                                <th>O₃ (Ozone):</th>
+                                <td>{{ metric.o3|floatformat:2 }} ppb</td>
+                            </tr>
+                            <tr>
+                                <th>NO₂:</th>
+                                <td>{{ metric.no2|floatformat:2 }} ppb</td>
+                            </tr>
+                            <tr>
+                                <th>SO₂:</th>
+                                <td>{{ metric.so2|floatformat:2 }} ppb</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Weather Parameters</h5>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Temperature:</th>
+                                <td>{{ metric.temperature|floatformat:1 }}°C</td>
+                            </tr>
+                            <tr>
+                                <th>Humidity:</th>
+                                <td>{{ metric.humidity|floatformat:1 }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AQI Information if available -->
+    {% if aqi_data %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Air Quality Index</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>AQI: {{ aqi_data.aqi_value }}</h4>
+                    <p class="h5">Category: 
+                        <span class="badge bg-{{ aqi_data.category|lower }}">
+                            {{ aqi_data.category }}
+                        </span>
+                    </p>
+                    <p><strong>Dominant Pollutant:</strong> {{ aqi_data.dominant_pollutant }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Health Implications</h5>
+                    <p>{{ aqi_data.health_implications }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Visualizations -->
+    {% if parameters_graph %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Air Quality Parameters Trend</h3>
+        </div>
+        <div class="card-body">
+            {{ parameters_graph|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if temp_humid_graph %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Temperature and Humidity Trend</h3>
+        </div>
+        <div class="card-body">
+            {{ temp_humid_graph|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Surrounding Measurements Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Nearby Measurements</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>PM2.5</th>
+                            <th>PM10</th>
+                            <th>O₃</th>
+                            <th>Temperature</th>
+                            <th>Humidity</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in surrounding_metrics %}
+                        <tr {% if m.pk == metric.pk %}class="table-primary"{% endif %}>
+                            <td>{{ m.timestamp }}</td>
+                            <td>{{ m.pm25|floatformat:2 }}</td>
+                            <td>{{ m.pm10|floatformat:2 }}</td>
+                            <td>{{ m.o3|floatformat:2 }}</td>
+                            <td>{{ m.temperature|floatformat:1 }}°C</td>
+                            <td>{{ m.humidity|floatformat:1 }}%</td>
+                            <td>
+                                {% if m.pk != metric.pk %}
+                                <a href="{% url 'metric_detail' m.pk %}" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

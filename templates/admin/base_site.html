@@ -1,0 +1,234 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        Environmental Data Dashboard Administration
+    </a>
+</h1>
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #3498db;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #c0392b;
+    }
+
+    /* Header Styling */
+    #header {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    #header a:link, #header a:visited {
+        color: white;
+    }
+
+    #branding h1 {
+        font-weight: bold;
+    }
+
+    /* Content Area */
+    #content {
+        padding: 20px;
+    }
+
+    .module h2, .module caption {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Dashboard Styling */
+    .dashboard .module table th {
+        background: var(--secondary-color);
+    }
+
+    .dashboard .module table td a {
+        color: var(--accent-color);
+    }
+
+    /* Form Styling */
+    .submit-row input {
+        background: var(--accent-color);
+        border: none;
+    }
+
+    .submit-row input:hover {
+        background: #2980b9;
+    }
+
+    .submit-row input.default {
+        background: var(--success-color);
+    }
+
+    .submit-row input.default:hover {
+        background: #219a52;
+    }
+
+    /* List View */
+    #changelist-form .actions {
+        background: white;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    #changelist table thead th {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .paginator {
+        background: white;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Field Sets */
+    fieldset.module {
+        background: white;
+        padding: 20px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Messages */
+    .success {
+        background: var(--success-color);
+    }
+
+    .warning {
+        background: var(--warning-color);
+    }
+
+    .errornote {
+        background: var(--danger-color);
+    }
+
+    /* Object Tools */
+    .object-tools a:link, .object-tools a:visited {
+        background: var(--accent-color);
+    }
+
+    .object-tools a:hover {
+        background: #2980b9;
+    }
+
+    /* Delete Confirmation */
+    .delete-confirmation form {
+        background: white;
+        padding: 20px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Login Form */
+    .login {
+        background: white;
+        padding: 20px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Sample Field Labels */
+    .required label, label.required {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    /* Filter Sidebar */
+    #changelist-filter {
+        background: white;
+        padding: 15px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    #changelist-filter h2 {
+        background: var(--primary-color);
+        color: white;
+        border-radius: 4px 4px 0 0;
+    }
+
+    /* Action Buttons */
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 15px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover {
+        background: #2980b9;
+    }
+
+    /* Custom Additions for Environmental Dashboard */
+    .metric-value {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .metric-value.good {
+        background: var(--success-color);
+        color: white;
+    }
+
+    .metric-value.moderate {
+        background: var(--warning-color);
+        color: white;
+    }
+
+    .metric-value.bad {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        #header {
+            padding: 10px 20px;
+        }
+
+        #content {
+            padding: 15px;
+        }
+
+        .form-row {
+            padding: 8px 0;
+        }
+    }
+
+    @media (max-width: 767px) {
+        #header {
+            padding: 10px;
+        }
+
+        #content {
+            padding: 10px;
+        }
+
+        .form-row {
+            padding: 6px 0;
+        }
+
+        .submit-row {
+            padding: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

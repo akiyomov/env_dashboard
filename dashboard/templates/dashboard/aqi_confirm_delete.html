@@ -1,0 +1,29 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Delete AQI Record</h2>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the AQI record for {{ aqi.location.city }} from {{ aqi.timestamp }}?</p>
+                    <p>
+                        <strong>AQI Value:</strong> {{ aqi.aqi_value }}<br>
+                        <strong>Category:</strong> {{ aqi.category }}
+                    </p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                            <a href="{% url 'aqi_detail' aqi.pk %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Air Quality Index Records</h1>
+        <a href="{% url 'aqi_create' %}" class="btn btn-primary">Add AQI Record</a>
+    </div>
+
+    <div class="row">
+        {% for aqi in aqi_records %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ aqi.location.city }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ aqi.timestamp }}</h6>
+                    <p class="card-text">
+                        AQI Value: {{ aqi.aqi_value }}<br>
+                        Category: <span class="badge bg-{{ aqi.category|lower }}">{{ aqi.category }}</span><br>
+                        Dominant Pollutant: {{ aqi.dominant_pollutant }}
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'aqi_detail' aqi.pk %}" class="btn btn-primary btn-sm">View Details</a>
+                    <a href="{% url 'aqi_update' aqi.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                    <a href="{% url 'aqi_delete' aqi.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <p>No AQI records available.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

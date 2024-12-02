@@ -1,0 +1,113 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Query Demonstrations</h1>
+    <p class="lead">This page demonstrates the required SQL queries for the project.</p>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ queries_info.join_query.title }}</h2>
+            <p class="mb-0">{{ queries_info.join_query.description }}</p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>PM2.5</th>
+                            <th>Temperature</th>
+                            <th>Alert Threshold</th>
+                            <th>AQI Value</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in join_results %}
+                        <tr>
+                            <td>{{ result.city }}</td>
+                            <td>{{ result.country }}</td>
+                            <td>{{ result.pm25|floatformat:2 }}</td>
+                            <td>{{ result.temperature|floatformat:1 }}°C</td>
+                            <td>{{ result.threshold_value }}</td>
+                            <td>{{ result.aqi_value }}</td>
+                            <td>{{ result.category }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ queries_info.aggregate_query.title }}</h2>
+            <p class="mb-0">{{ queries_info.aggregate_query.description }}</p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>Measurements</th>
+                            <th>Avg PM2.5</th>
+                            <th>Max PM2.5</th>
+                            <th>Min PM2.5</th>
+                            <th>Avg Temperature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in aggregate_results %}
+                        <tr>
+                            <td>{{ result.city }}</td>
+                            <td>{{ result.country }}</td>
+                            <td>{{ result.total_measurements }}</td>
+                            <td>{{ result.avg_pm25|floatformat:2 }}</td>
+                            <td>{{ result.max_pm25|floatformat:2 }}</td>
+                            <td>{{ result.min_pm25|floatformat:2 }}</td>
+                            <td>{{ result.avg_temperature|floatformat:1 }}°C</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>{{ queries_info.subquery.title }}</h2>
+            <p class="mb-0">{{ queries_info.subquery.description }}</p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Country</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in subquery_results %}
+                        <tr>
+                            <td>{{ result.city }}</td>
+                            <td>{{ result.country }}</td>
+                            <td>{{ result.latitude }}</td>
+                            <td>{{ result.longitude }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <h1>Alert Details</h1>
+            <h4>{{ alert.location.city }} - {{ alert.metric_type }}</h4>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'alert_update' alert.pk %}" class="btn btn-primary">Edit</a>
+            <a href="{% url 'alert_delete' alert.pk %}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Location:</strong> {{ alert.location.city }}, {{ alert.location.country }}</p>
+            <p><strong>Metric:</strong> {{ alert.metric_type }}</p>
+            <p><strong>Threshold:</strong> {{ alert.threshold_value }}</p>
+            <p><strong>Status:</strong> {% if alert.is_active %}Active{% else %}Inactive{% endif %}</p>
+            <p><strong>Created:</strong> {{ alert.created_at }}</p>
+        </div>
+    </div>
+
+    {% if threshold_graph %}
+    <div class="card mb-4">
+        <div class="card-body">
+            {{ threshold_graph|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Measurements -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent Measurements</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for metric in relevant_metrics %}
+                        <tr>
+                            <td>{{ metric.timestamp }}</td>
+                            <td>{{ metric|get_metric_value:alert.metric_type }}</td>
+                            <td>
+                                {% if metric|get_metric_value:alert.metric_type > alert.threshold_value %}
+                                <span class="badge bg-danger">Above Threshold</span>
+                                {% else %}
+                                <span class="badge bg-success">Normal</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

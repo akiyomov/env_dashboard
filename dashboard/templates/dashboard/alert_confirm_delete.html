@@ -1,0 +1,26 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Delete Alert</h2>
+                </div>
+                <div class="card-body">
+                    <p>Are you sure you want to delete the {{ alert.metric_type }} alert for {{ alert.location.city }}?</p>
+                    <p><strong>Threshold Value:</strong> {{ alert.threshold_value }}</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                            <a href="{% url 'alert_detail' alert.pk %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

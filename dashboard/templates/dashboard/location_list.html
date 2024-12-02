@@ -1,0 +1,38 @@
+<!-- templates/dashboard/location_list.html -->
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Locations</h1>
+        <a href="{% url 'location_create' %}" class="btn btn-primary">Add Location</a>
+    </div>
+
+    <div class="row">
+        {% for location in locations %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ location.city }}, {{ location.country }}</h5>
+                    <p class="card-text">
+                        Coordinates: {{ location.latitude }}, {{ location.longitude }}<br>
+                        {% if location.elevation %}
+                        Elevation: {{ location.elevation }}m
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'location_detail' location.pk %}" class="btn btn-primary btn-sm">View Details</a>
+                    <a href="{% url 'location_update' location.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                    <a href="{% url 'location_delete' location.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <p>No locations available.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
