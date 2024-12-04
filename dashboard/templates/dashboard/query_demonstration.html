@@ -2,112 +2,255 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Query Demonstrations</h1>
-    <p class="lead">This page demonstrates the required SQL queries for the project.</p>
+   <h1>Query Demonstrations</h1>
+   <p class="lead">This page demonstrates the required SQL queries for the project.</p>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>{{ queries_info.join_query.title }}</h2>
-            <p class="mb-0">{{ queries_info.join_query.description }}</p>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>City</th>
-                            <th>Country</th>
-                            <th>PM2.5</th>
-                            <th>Temperature</th>
-                            <th>Alert Threshold</th>
-                            <th>AQI Value</th>
-                            <th>Category</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in join_results %}
-                        <tr>
-                            <td>{{ result.city }}</td>
-                            <td>{{ result.country }}</td>
-                            <td>{{ result.pm25|floatformat:2 }}</td>
-                            <td>{{ result.temperature|floatformat:1 }}°C</td>
-                            <td>{{ result.threshold_value }}</td>
-                            <td>{{ result.aqi_value }}</td>
-                            <td>{{ result.category }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+   <script>
+       function toggleRows(button) {
+           const tbody = button.previousElementSibling.querySelector('.table-rows-limited');
+           tbody.classList.toggle('show-all');
+           button.textContent = tbody.classList.contains('show-all') 
+               ? 'Show Less' 
+               : `See All (${tbody.children.length})`;
+       }
+   </script>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>{{ queries_info.aggregate_query.title }}</h2>
-            <p class="mb-0">{{ queries_info.aggregate_query.description }}</p>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>City</th>
-                            <th>Country</th>
-                            <th>Measurements</th>
-                            <th>Avg PM2.5</th>
-                            <th>Max PM2.5</th>
-                            <th>Min PM2.5</th>
-                            <th>Avg Temperature</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in aggregate_results %}
-                        <tr>
-                            <td>{{ result.city }}</td>
-                            <td>{{ result.country }}</td>
-                            <td>{{ result.total_measurements }}</td>
-                            <td>{{ result.avg_pm25|floatformat:2 }}</td>
-                            <td>{{ result.max_pm25|floatformat:2 }}</td>
-                            <td>{{ result.min_pm25|floatformat:2 }}</td>
-                            <td>{{ result.avg_temperature|floatformat:1 }}°C</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+   <!-- Join Query Results -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.join_query.title }}</h2>
+           <p class="mb-0">{{ queries_info.join_query.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>City</th>
+                           <th>Country</th>
+                           <th>PM2.5</th>
+                           <th>Temperature</th>
+                           <th>Alert Threshold</th>
+                           <th>AQI Value</th>
+                           <th>Category</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for result in join_results %}
+                       <tr>
+                           <td>{{ result.city }}</td>
+                           <td>{{ result.country }}</td>
+                           <td>{{ result.pm25|floatformat:2 }}</td>
+                           <td>{{ result.temperature|floatformat:1 }}°C</td>
+                           <td>{{ result.threshold_value }}</td>
+                           <td>{{ result.aqi_value }}</td>
+                           <td>{{ result.category }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if join_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ join_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <h2>{{ queries_info.subquery.title }}</h2>
-            <p class="mb-0">{{ queries_info.subquery.description }}</p>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>City</th>
-                            <th>Country</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in subquery_results %}
-                        <tr>
-                            <td>{{ result.city }}</td>
-                            <td>{{ result.country }}</td>
-                            <td>{{ result.latitude }}</td>
-                            <td>{{ result.longitude }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+   <!-- Aggregate Query Results -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.aggregate_query.title }}</h2>
+           <p class="mb-0">{{ queries_info.aggregate_query.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>City</th>
+                           <th>Country</th>
+                           <th>Measurements</th>
+                           <th>Avg PM2.5</th>
+                           <th>Max PM2.5</th>
+                           <th>Min PM2.5</th>
+                           <th>Avg Temperature</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for result in aggregate_results %}
+                       <tr>
+                           <td>{{ result.city }}</td>
+                           <td>{{ result.country }}</td>
+                           <td>{{ result.total_measurements }}</td>
+                           <td>{{ result.avg_pm25|floatformat:2 }}</td>
+                           <td>{{ result.max_pm25|floatformat:2 }}</td>
+                           <td>{{ result.min_pm25|floatformat:2 }}</td>
+                           <td>{{ result.avg_temperature|floatformat:1 }}°C</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if aggregate_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ aggregate_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
+
+   <!-- Subquery Results -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.subquery.title }}</h2>
+           <p class="mb-0">{{ queries_info.subquery.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>City</th>
+                           <th>Country</th>
+                           <th>Latitude</th>
+                           <th>Longitude</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for result in subquery_results %}
+                       <tr>
+                           <td>{{ result.city }}</td>
+                           <td>{{ result.country }}</td>
+                           <td>{{ result.latitude }}</td>
+                           <td>{{ result.longitude }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if subquery_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ subquery_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
+
+   <!-- Continuous High Pollution Locations -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.continuous_high_pollution_locations.title }}</h2>
+           <p class="mb-0">{{ queries_info.continuous_high_pollution_locations.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>City</th>
+                           <th>Country</th>
+                           <th>High Pollution Days</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for result in continuous_high_pollution_locations_results %}
+                       <tr>
+                           <td>{{ result.city }}</td>
+                           <td>{{ result.country }}</td>
+                           <td>{{ result.high_pollution_days }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if continuous_high_pollution_locations_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ continuous_high_pollution_locations_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
+
+   <!-- Temperature Spike Locations -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.temperature_spike_locations.title }}</h2>
+           <p class="mb-0">{{ queries_info.temperature_spike_locations.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>City</th>
+                           <th>Country</th>
+                           <th>Temperature Change (°C)</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for result in temperature_spike_locations_results %}
+                       <tr>
+                           <td>{{ result.city }}</td>
+                           <td>{{ result.country }}</td>
+                           <td>{{ result.temp_change|floatformat:1 }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if temperature_spike_locations_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ temperature_spike_locations_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
+
+   <!-- Alerts Triggered Last Week -->
+   <div class="card mb-4">
+       <div class="card-header">
+           <h2>{{ queries_info.alerts_triggered_last_week.title }}</h2>
+           <p class="mb-0">{{ queries_info.alerts_triggered_last_week.description }}</p>
+       </div>
+       <div class="card-body">
+           <div class="table-responsive">
+               <table class="table table-striped">
+                   <thead>
+                       <tr>
+                           <th>Location</th>
+                           <th>Metric Type</th>
+                           <th>Threshold</th>
+                           <th>Current Value</th>
+                           <th>Time</th>
+                       </tr>
+                   </thead>
+                   <tbody class="table-rows-limited">
+                       {% for alert in alerts_triggered_last_week_results %}
+                       <tr>
+                           <td>{{ alert.city }}, {{ alert.country }}</td>
+                           <td>{{ alert.metric_type }}</td>
+                           <td>{{ alert.threshold_value }}</td>
+                           <td>
+                               {% if alert.metric_type == 'PM2.5' %}
+                                   {{ alert.pm25|floatformat:1 }}
+                               {% else %}
+                                   {{ alert.temperature|floatformat:1 }}°C
+                               {% endif %}
+                           </td>
+                           <td>{{ alert.timestamp }}</td>
+                       </tr>
+                       {% endfor %}
+                   </tbody>
+               </table>
+               {% if alerts_triggered_last_week_results|length > 20 %}
+                   <button class="btn btn-link see-more" onclick="toggleRows(this)">
+                       See All ({{ alerts_triggered_last_week_results|length }})
+                   </button>
+               {% endif %}
+           </div>
+       </div>
+   </div>
 </div>
 {% endblock %}

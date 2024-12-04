@@ -225,3 +225,10 @@ main {
 .aqi-good { color: var(--success-color); }
 .aqi-moderate { color: var(--warning-color); }
 .aqi-unhealthy { color: var(--danger-color); }
+
+.table-rows-limited tr:nth-child(n+21) {
+    display: none;
+}
+.show-all .table-rows-limited tr:nth-child(n+21) {
+    display: table-row;
+}

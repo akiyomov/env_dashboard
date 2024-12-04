@@ -33,11 +33,17 @@ def query_demonstration(request):
     join_results = SampleQueries.join_query_locations_with_alerts()
     aggregate_results = SampleQueries.aggregate_query_city_statistics()
     subquery_results = SampleQueries.subquery_high_pollution_locations()
+    continuous_high_pollution_locations_results = SampleQueries.continuous_high_pollution_locations()
+    temperature_spike_locations_results = SampleQueries.temperature_spike_locations()
+    alerts_triggered_last_week_results = SampleQueries.alerts_triggered_last_week()
 
     context = {
         'join_results': join_results,
         'aggregate_results': aggregate_results,
         'subquery_results': subquery_results,
+        'continuous_high_pollution_locations_results': continuous_high_pollution_locations_results,
+        'temperature_spike_locations_results': temperature_spike_locations_results,
+        'alerts_triggered_last_week_results': alerts_triggered_last_week_results,
         'queries_info': {
             'join_query': {
                 'title': 'Join Query Example',
@@ -50,6 +56,18 @@ def query_demonstration(request):
             'subquery': {
                 'title': 'Subquery Example',
                 'description': 'Finds locations with above-average pollution levels'
+            },
+            'continuous_high_pollution_locations': {
+                'title': 'Continuous High Pollution Locations',
+                'description': 'Finds locations with continuous high pollution levels'
+            },
+            'temperature_spike_locations': {
+                'title': 'Temperature Spike Locations',
+                'description': 'Finds locations with temperature spikes'
+            },
+            'alerts_triggered_last_week': {
+                'title': 'Alerts Triggered Last Week',
+                'description': 'Finds alerts triggered in the last week'
             }
         }
     }
