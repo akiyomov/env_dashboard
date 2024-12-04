@@ -144,8 +144,8 @@ class SampleQueries:
                 HAVING COUNT(*) = 3
                 ORDER BY l.city;
             """)
-        columns = [col[0] for col in cursor.description]
-        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
     
     @staticmethod
     def temperature_spike_locations():
@@ -160,6 +160,29 @@ class SampleQueries:
                 HAVING temp_change > 10
                 ORDER BY temp_change DESC;
             """)
-        columns = [col[0] for col in cursor.description]
-        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+    @staticmethod
+    def alerts_triggered_last_week():
+    # Retrieves alerts triggered in the past week with associated metrics.
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    a.metric_type,
+                    a.threshold_value,
+                    l.city,
+                    l.country,
+                    m.pm25,
+                    m.temperature,
+                    m.timestamp
+                FROM dashboard_alert a
+                JOIN dashboard_location l ON a.location_id = l.id
+                JOIN dashboard_metric m ON a.location_id = m.location_id
+                WHERE a.is_active = True
+                AND m.timestamp >= DATE('now', '-7 days')
+                ORDER BY m.timestamp DESC;
+            """)
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
