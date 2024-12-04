@@ -1,40 +1,63 @@
 {% extends 'dashboard/base.html' %}
 
+{% block title %}Alerts - Environmental Dashboard{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>My Alerts</h1>
-        <a href="{% url 'alert_create' %}" class="btn btn-primary">Create Alert</a>
+        <h1>Air Quality Alerts</h1>
+        <a href="{% url 'alert_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Alert
+        </a>
     </div>
 
-    <div class="row">
-        {% for alert in alerts %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">{{ alert.location.city }}</h5>
-                    <p class="card-text">
-                        Metric: {{ alert.metric_type }}<br>
-                        Threshold: {{ alert.threshold_value }}<br>
-                        Status: {% if alert.is_active %}
-                            <span class="badge bg-success">Active</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Inactive</span>
+    {% if alerts %}
+        <div class="row">
+            {% for alert in alerts %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card dashboard-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ alert.location.city }}</h5>
+                        <span class="badge {% if alert.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ alert.is_active|yesno:"Active,Inactive" }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>Metric:</strong> {{ alert.metric_type }}<br>
+                            <strong>Threshold:</strong> {{ alert.threshold_value }}<br>
+                            <strong>Created:</strong> {{ alert.created_at|date:"M d, Y" }}
+                        </p>
+
+                        {% if alert.location.metrics.last %}
+                        <div class="mt-3">
+                            <h6>Latest Reading:</h6>
+                            <p class="mb-0">
+                                Value: {{ alert.location.metrics.last.pm25|default:"N/A" }}<br>
+                                Time: {{ alert.location.metrics.last.timestamp|date:"M d, Y H:i" }}
+                            </p>
+                        </div>
                         {% endif %}
-                    </p>
-                </div>
-                <div class="card-footer">
-                    <a href="{% url 'alert_detail' alert.pk %}" class="btn btn-primary btn-sm">View Details</a>
-                    <a href="{% url 'alert_update' alert.pk %}" class="btn btn-secondary btn-sm">Edit</a>
-                    <a href="{% url 'alert_delete' alert.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100">
+                            <a href="{% url 'alert_update' alert.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <a href="{% url 'alert_delete' alert.pk %}" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="col">
-            <p>No alerts set up yet.</p>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>No alerts set up yet. 
+            <a href="{% url 'alert_create' %}" class="alert-link">Create your first alert</a>
         </div>
-        {% endfor %}
-    </div>
+    {% endif %}
 </div>
 {% endblock %}

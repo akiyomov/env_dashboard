@@ -1,0 +1,71 @@
+{% extends 'dashboard/base.html' %}
+{% load dashboard_filters %} 
+
+{% block title %}Trends - {{ location.city }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ location.city }} Trends</h1>
+        <div class="btn-group">
+            <a href="?days=7" class="btn btn-outline-primary {% if days == 7 %}active{% endif %}">7 Days</a>
+            <a href="?days=30" class="btn btn-outline-primary {% if days == 30 %}active{% endif %}">30 Days</a>
+            <a href="?days=90" class="btn btn-outline-primary {% if days == 90 %}active{% endif %}">90 Days</a>
+        </div>
+    </div>
+
+    {% if graphs %}
+        <div class="row">
+            {% for metric_type, graph in graphs.items %}
+            <div class="col-12 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-body">
+                        {{ graph|safe }}
+                        
+                        {% with data=trend_summary|get_item:metric_type %}
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Average</h6>
+                                        <p class="h4 mb-0">
+                                            {{ data.avg_values|last|floatformat:2 }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Maximum</h6>
+                                        <p class="h4 mb-0">
+                                            {{ data.max_values|last|floatformat:2 }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Minimum</h6>
+                                        <p class="h4 mb-0">
+                                            {{ data.min_values|last|floatformat:2 }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No trend data available for this period.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

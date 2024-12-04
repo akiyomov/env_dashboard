@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +11,8 @@ from django.utils import timezone
 from .forms import AlertForm, AQIForm, LocationForm, MetricForm
 from .models import AirQualityIndex, Alert, Location, Metric
 from .queries import SampleQueries
-
+from .services.alert_service import AlertService
+from .services.trend_service import TrendService
 
 def index(request):
     latest_metrics = Metric.objects.select_related('location').order_by('-timestamp')[:5]
@@ -64,38 +66,41 @@ def location_list(request):
 def location_detail(request, pk):
     location = get_object_or_404(Location, pk=pk)
     
-    # Get latest metrics for this location
     latest_metrics = Metric.objects.filter(
         location=location
     ).order_by('-timestamp')[:30]  # Last 30 readings
     
-    # Get AQI history
     aqi_history = AirQualityIndex.objects.filter(
         location=location
     ).order_by('-timestamp')[:30]
     
-    # Get active alerts for this location
     alerts = Alert.objects.filter(
         location=location,
         is_active=True
     )
     
-    # Create visualization data
     if latest_metrics:
+
         df = pd.DataFrame(list(latest_metrics.values()))
         
-        # PM2.5 trend
         fig_pm25 = px.line(df, x='timestamp', y='pm25', 
                           title='PM2.5 Trend Over Time')
         pm25_graph = fig_pm25.to_html(full_html=False)
         
-        # Temperature and Humidity
         fig_temp = px.line(df, x='timestamp', y=['temperature', 'humidity'],
                           title='Temperature and Humidity Trends')
         temp_humid_graph = fig_temp.to_html(full_html=False)
     else:
         pm25_graph = None
         temp_humid_graph = None
+
+    metrics_list = list(latest_metrics)
+    if metrics_list:
+        avg_temp = sum(m.temperature for m in metrics_list if m.temperature) / len(metrics_list)
+        avg_humidity = sum(m.humidity for m in metrics_list if m.humidity) / len(metrics_list)
+    else:
+        avg_temp = 0
+        avg_humidity = 0
     
     context = {
         'location': location,
@@ -103,6 +108,8 @@ def location_detail(request, pk):
         'aqi_history': aqi_history,
         'alerts': alerts,
         'pm25_graph': pm25_graph,
+        'avg_temp': avg_temp,
+        'avg_humidity': avg_humidity,
         'temp_humid_graph': temp_humid_graph
     }
     return render(request, 'dashboard/location_detail.html', context)
@@ -234,7 +241,7 @@ def metric_delete(request, pk):
 # Alert CRUD
 @login_required
 def alert_list(request):
-    alerts = Alert.objects.filter(user=request.user).order_by('-created_at')
+    alerts = Alert.objects.filter(user=request.user).select_related('location').order_by('-created_at')
     return render(request, 'dashboard/alert_list.html', {'alerts': alerts})
 
 @login_required
@@ -274,14 +281,76 @@ def alert_create(request):
     if request.method == 'POST':
         form = AlertForm(request.POST)
         if form.is_valid():
-            alert = form.save(commit=False)
-            alert.user = request.user
-            alert.save()
-            messages.success(request, 'Alert created successfully!')
-            return redirect('alert_list')
+            # Instead of directly saving, use the service
+            alert, violations = AlertService.create_alert_with_check(
+                user=request.user,
+                location=form.cleaned_data['location'],
+                metric_type=form.cleaned_data['metric_type'],
+                threshold_value=form.cleaned_data['threshold_value']
+            )
+
+            if violations:
+                messages.warning(
+                    request,
+                    f'Alert created, but there are {len(violations)} violations in the last 24 hours!'
+                )
+                return redirect('alert_violations', alert_id=alert.id)
+            else:
+                messages.success(request, 'Alert created successfully!')
+                return redirect('alert_list')
     else:
         form = AlertForm()
-    return render(request, 'dashboard/alert_form.html', {'form': form, 'action': 'Create'})
+    
+    return render(request, 'dashboard/alert_form.html', {
+        'form': form,
+        'action': 'Create'
+    })
+
+@login_required
+def alert_violations(request, alert_id):
+    alert = get_object_or_404(Alert, id=alert_id, user=request.user)
+    
+    _, violations = AlertService.create_alert_with_check(
+        user=alert.user,
+        location=alert.location,
+        metric_type=alert.metric_type,
+        threshold_value=alert.threshold_value
+    )
+
+    return render(request, 'dashboard/alert_violations.html', {
+        'alert': alert,
+        'violations': violations
+    })
+
+@login_required
+def check_alert_violations(request):
+    alerts = Alert.objects.filter(
+        user=request.user,
+        is_active=True
+    ).select_related('location')
+
+    violations = []
+    for alert in alerts:
+        latest_metric = Metric.objects.filter(
+            location=alert.location
+        ).order_by('-timestamp').first()
+
+        if latest_metric:
+            current_value = getattr(latest_metric, alert.metric_type.lower().replace('.', ''), None)
+            
+            if current_value and current_value > alert.threshold_value:
+                violations.append({
+                    'alert': alert,
+                    'current_value': current_value,
+                    'threshold': alert.threshold_value,
+                    'timestamp': latest_metric.timestamp,
+                    'excess': current_value - alert.threshold_value
+                })
+
+    return render(request, 'dashboard/alert_violations_check.html', {
+        'violations': violations
+    })
+
 
 @login_required
 def alert_update(request, pk):
@@ -378,3 +447,61 @@ def aqi_delete(request, pk):
         messages.success(request, 'AQI record deleted successfully!')
         return redirect('aqi_list')
     return render(request, 'dashboard/aqi_confirm_delete.html', {'aqi': aqi})
+
+
+@login_required
+def location_trends(request, location_id):
+    location = get_object_or_404(Location, pk=location_id)
+    
+    # Get period from query params or default to 30 days
+    days = int(request.GET.get('days', 30))
+    
+    # Generate trends if needed
+    TrendService.generate_trends(location, days)
+    
+    # Get trend summary
+    trend_summary = TrendService.get_trend_summary(location, days)
+    
+    # Create visualizations using plotly
+    graphs = {}
+    for metric_type, data in trend_summary.items():
+        if data['dates']:  # Only create graph if we have data
+            fig = go.Figure()
+            
+            # Add average line
+            fig.add_trace(go.Scatter(
+                x=data['dates'],
+                y=data['avg_values'],
+                name='Average',
+                line=dict(color='blue')
+            ))
+            
+            # Add range
+            fig.add_trace(go.Scatter(
+                x=data['dates'] + data['dates'][::-1],
+                y=data['max_values'] + data['min_values'][::-1],
+                fill='toself',
+                fillcolor='rgba(0,0,255,0.1)',
+                line=dict(color='rgba(255,255,255,0)'),
+                name='Range',
+                showlegend=False
+            ))
+            
+            fig.update_layout(
+                title=f'{metric_type} Trends',
+                xaxis_title='Date',
+                yaxis_title='Value',
+                height=400,
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            
+            graphs[metric_type] = fig.to_html(full_html=False)
+    
+    context = {
+        'location': location,
+        'graphs': graphs,
+        'days': days,
+        'trend_summary': trend_summary
+    }
+    
+    return render(request, 'dashboard/location_trends.html', context)

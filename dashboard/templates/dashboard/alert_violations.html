@@ -1,0 +1,56 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Alert Violations - Environmental Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">Alert Violations</h2>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h4 class="alert-heading">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Threshold Violations Detected!
+                </h4>
+                <p>The following measurements exceed your alert threshold for {{ alert.get_metric_type_display }}
+                   in {{ alert.location.city }}.</p>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Location</th>
+                            <th>Value</th>
+                            <th>Threshold</th>
+                            <th>Excess</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for violation in violations %}
+                        <tr>
+                            <td>{{ violation.timestamp }}</td>
+                            <td>{{ violation.location }}</td>
+                            <td class="text-danger">{{ violation.value }}</td>
+                            <td>{{ violation.threshold }}</td>
+                            <td class="text-danger">
+                                +{{ violation.value|sub:violation.threshold|floatformat:1 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                <a href="{% url 'alert_list' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Alerts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

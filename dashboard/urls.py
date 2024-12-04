@@ -10,6 +10,7 @@ urlpatterns = [
     path('locations/create/', views.location_create, name='location_create'),
     path('locations/<int:pk>/update/', views.location_update, name='location_update'),
     path('locations/<int:pk>/delete/', views.location_delete, name='location_delete'),
+    path('locations/<int:location_id>/trends/', views.location_trends, name='location_trends'),
 
     path('metrics/', views.metric_list, name='metric_list'),
     path('metrics/<int:pk>/', views.metric_detail, name='metric_detail'),
@@ -22,6 +23,8 @@ urlpatterns = [
     path('alerts/create/', views.alert_create, name='alert_create'),
     path('alerts/<int:pk>/update/', views.alert_update, name='alert_update'),
     path('alerts/<int:pk>/delete/', views.alert_delete, name='alert_delete'),
+    path('alerts/<int:alert_id>/violations/', views.alert_violations, name='alert_violations'),
+    path('alerts/check/', views.check_alert_violations, name='check_alert_violations'),
 
     path('aqi/', views.aqi_list, name='aqi_list'),
     path('aqi/<int:pk>/', views.aqi_detail, name='aqi_detail'),

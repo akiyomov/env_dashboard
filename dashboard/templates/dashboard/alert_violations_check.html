@@ -1,0 +1,84 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Current Alert Violations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Current Alert Violations</h1>
+        <button onclick="location.reload()" class="btn btn-primary">
+            <i class="fas fa-sync-alt me-2"></i>Refresh
+        </button>
+    </div>
+
+    {% if violations %}
+        <div class="row">
+            {% for violation in violations %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card dashboard-card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Alert Violation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-danger">
+                            {{ violation.alert.location.city }}, {{ violation.alert.location.country }}
+                        </h6>
+                        <div class="mt-3">
+                            <p class="mb-2">
+                                <strong>Metric:</strong> {{ violation.alert.metric_type }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Current Value:</strong> 
+                                <span class="text-danger">{{ violation.current_value|floatformat:2 }}</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Threshold:</strong> {{ violation.threshold|floatformat:2 }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Excess:</strong> 
+                                <span class="text-danger">+{{ violation.excess|floatformat:2 }}</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Time:</strong> {{ violation.timestamp }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'location_detail' violation.alert.location.pk %}" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-chart-line me-1"></i>View Location Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            No current alert violations found. All metrics are within thresholds.
+        </div>
+    {% endif %}
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4 class="mb-0">About Alert Checking</h4>
+        </div>
+        <div class="card-body">
+            <p>This page shows current violations of your active alerts. A violation occurs when:</p>
+            <ul>
+                <li>The latest measurement exceeds your alert threshold</li>
+                <li>The alert is currently active</li>
+                <li>The measurement is for your monitored locations</li>
+            </ul>
+            <p class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Click the refresh button to check for new violations.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

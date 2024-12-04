@@ -1,8 +1,10 @@
-<!-- templates/dashboard/location_detail.html -->
 {% extends 'dashboard/base.html' %}
+{% load dashboard_filters %} 
+{% block title %}{{ location.city }} - Environmental Dashboard{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
+    <!-- Location Header -->
     <div class="row">
         <div class="col">
             <h1>{{ location.city }}, {{ location.country }}</h1>
@@ -14,32 +16,151 @@
             </p>
         </div>
         <div class="col-auto">
-            <a href="{% url 'location_update' location.pk %}" class="btn btn-primary">Edit</a>
-            <a href="{% url 'location_delete' location.pk %}" class="btn btn-danger">Delete</a>
+            <a href="{% url 'location_update' location.pk %}" class="btn btn-primary">
+                <i class="fas fa-edit me-2"></i>Edit
+            </a>
+            <a href="{% url 'location_delete' location.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Delete
+            </a>
         </div>
     </div>
 
-    <!-- Visualizations -->
+    <!-- Action Buttons and Stats Summary -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="btn-group">
+                <a href="{% url 'location_trends' location.pk %}" class="btn btn-primary">
+                    <i class="fas fa-chart-line me-2"></i>View Trends
+                </a>
+                <a href="{% url 'alert_create' %}?location={{ location.pk }}" class="btn btn-warning">
+                    <i class="fas fa-bell me-2"></i>Create Alert
+                </a>
+                <a href="{% url 'check_alert_violations' %}?location={{ location.pk }}" class="btn btn-info">
+                    <i class="fas fa-exclamation-circle me-2"></i>Check Violations
+                </a>
+            </div>
+        </div>
+        <div class="col-auto">
+            <div class="card bg-light">
+                <div class="card-body p-2">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <small class="text-muted d-block">Active Alerts</small>
+                            <span class="h5 mb-0">{{ alerts|length }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Measurements</small>
+                            <span class="h5 mb-0">{{ latest_metrics|length }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Latest AQI Status and Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Latest AQI Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if latest_metrics.0 %}
+                    <div class="text-center">
+                        <h3 class="mb-0">{{ latest_metrics.0.pm25|floatformat:0 }}</h3>
+                        <small class="text-muted">PM2.5 Value</small>
+                        
+                        <div class="mt-3">
+                            <span class="badge {% if latest_metrics.0.pm25 <= 50 %}bg-success{% elif latest_metrics.0.pm25 <= 100 %}bg-warning{% else %}bg-danger{% endif %} p-2">
+                                {% if latest_metrics.0.pm25 <= 50 %}
+                                    Good
+                                {% elif latest_metrics.0.pm25 <= 100 %}
+                                    Moderate
+                                {% else %}
+                                    Unhealthy
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <small class="text-muted d-block mt-2">
+                            Last updated: {{ latest_metrics.0.timestamp|timesince }} ago
+                        </small>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted mb-0">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+    <div class="mb-3">
+        <small class="text-muted d-block">Average Temperature</small>
+        <span class="h5">
+            {{ avg_temp|floatformat:1 }}°C
+        </span>
+    </div>
+    <div>
+        <small class="text-muted d-block">Average Humidity</small>
+        <span class="h5">
+            {{ avg_humidity|floatformat:1 }}%
+        </span>
+    </div>
+</div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">PM10 Level</small>
+                                <span class="h5">
+                                    {{ latest_metrics.0.pm10|floatformat:1 }} µg/m³
+                                </span>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Data Points</small>
+                                <span class="h5">{{ latest_metrics|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PM2.5 Graph -->
     {% if pm25_graph %}
     <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">PM2.5 Trend</h5>
+        </div>
         <div class="card-body">
             {{ pm25_graph|safe }}
         </div>
     </div>
     {% endif %}
 
+    <!-- Temperature and Humidity Graph -->
     {% if temp_humid_graph %}
     <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Temperature & Humidity Trend</h5>
+        </div>
         <div class="card-body">
             {{ temp_humid_graph|safe }}
         </div>
     </div>
     {% endif %}
 
-    <!-- Latest Metrics -->
+    <!-- Latest Measurements Table -->
     <div class="card mb-4">
         <div class="card-header">
-            <h3>Latest Measurements</h3>
+            <h5 class="mb-0">Latest Measurements</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -72,7 +193,7 @@
     <!-- Active Alerts -->
     <div class="card mb-4">
         <div class="card-header">
-            <h3>Active Alerts</h3>
+            <h5 class="mb-0">Active Alerts</h5>
         </div>
         <div class="card-body">
             {% if alerts %}
