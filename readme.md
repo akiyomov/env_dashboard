@@ -15,7 +15,7 @@ A comprehensive system for monitoring and analyzing environmental metrics includ
 ### 👥 Group Members
 
 - Kiyomov Asadbek (12225264)
--
+- Irmuun Munkhtulga (12220272)
 -
 -
 

@@ -129,3 +129,60 @@ class SampleQueries:
             metrics__pm25__gt=avg_pm25,
             metrics__timestamp__gte=timezone.now() - timezone.timedelta(days=7)
         ).distinct().order_by('city')
+    
+    @staticmethod
+    def continuous_high_pollution_locations():
+    #Identifies locations with PM2.5 consistently exceeding a threshold for the past 3 days.
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT l.city, l.country, COUNT(*) as high_pollution_days
+                FROM dashboard_location l
+                JOIN dashboard_metric m ON l.id = m.location_id
+                WHERE m.timestamp >= DATE('now', '-3 days')
+                AND m.pm25 > 50
+                GROUP BY l.city, l.country
+                HAVING COUNT(*) = 3
+                ORDER BY l.city;
+            """)
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+    @staticmethod
+    def temperature_spike_locations():
+    # Finds locations with temperature spikes greater than 10°C in the last 24 hours.
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT l.city, l.country, MAX(m.temperature) - MIN(m.temperature) as temp_change
+                FROM dashboard_location l
+                JOIN dashboard_metric m ON l.id = m.location_id
+                WHERE m.timestamp >= DATE('now', '-1 day')
+                GROUP BY l.city, l.country
+                HAVING temp_change > 10
+                ORDER BY temp_change DESC;
+            """)
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    @staticmethod
+    def alerts_triggered_last_week():
+    # Retrieves alerts triggered in the past week with associated metrics.
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    a.metric_type,
+                    a.threshold_value,
+                    l.city,
+                    l.country,
+                    m.pm25,
+                    m.temperature,
+                    m.timestamp
+                FROM dashboard_alert a
+                JOIN dashboard_location l ON a.location_id = l.id
+                JOIN dashboard_metric m ON a.location_id = m.location_id
+                WHERE a.is_active = True
+                AND m.timestamp >= DATE('now', '-7 days')
+                ORDER BY m.timestamp DESC;
+            """)
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
