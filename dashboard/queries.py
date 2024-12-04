@@ -129,3 +129,21 @@ class SampleQueries:
             metrics__pm25__gt=avg_pm25,
             metrics__timestamp__gte=timezone.now() - timezone.timedelta(days=7)
         ).distinct().order_by('city')
+    
+    @staticmethod
+    def continuous_high_pollution_locations():
+    #Identifies locations with PM2.5 consistently exceeding a threshold for the past 3 days.
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT l.city, l.country, COUNT(*) as high_pollution_days
+                FROM dashboard_location l
+                JOIN dashboard_metric m ON l.id = m.location_id
+                WHERE m.timestamp >= DATE('now', '-3 days')
+                AND m.pm25 > 50
+                GROUP BY l.city, l.country
+                HAVING COUNT(*) = 3
+                ORDER BY l.city;
+            """)
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
