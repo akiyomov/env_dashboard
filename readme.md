@@ -17,7 +17,7 @@ A comprehensive system for monitoring and analyzing environmental metrics includ
 - Kiyomov Asadbek (12225264)
 - Irmuun Munkhtulga (12220272)
 - Begmamatova Muattar (12244613)
--
+- Kosimov Shamskamar (12225258)
 
 ## 🔍 Project Overview
 
